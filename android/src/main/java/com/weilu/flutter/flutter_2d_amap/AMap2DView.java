@@ -161,7 +161,7 @@ public class AMap2DView implements PlatformView, MethodChannel.MethodCallHandler
         platformThreadHandler.removeCallbacks(postMessageRunnable);
         methodChannel.setMethodCallHandler(null);
     }
-
+    private final StringBuilder builders = new StringBuilder();
     @Override
     public void onLocationChanged(AMapLocation aMapLocation) {
         if (mListener != null && aMapLocation != null) {
@@ -170,6 +170,30 @@ public class AMap2DView implements PlatformView, MethodChannel.MethodCallHandler
                 mListener.onLocationChanged(aMapLocation);
                 aMap.moveCamera(CameraUpdateFactory.zoomTo(16));
                 search(aMapLocation.getLatitude(), aMapLocation.getLongitude());
+
+                builders.append("{");
+                builders.append("\"Street\": \"");builders.append(aMapLocation.getStreet());builders.append("\",");
+                builders.append("\"locationDetail\": \"");builders.append(aMapLocation.getDistrict());builders.append("\",");
+                builders.append("\"address\": \"");builders.append(aMapLocation.getAddress());builders.append("\",");
+                builders.append("\"cityCode\": \"");builders.append(aMapLocation.getCityCode());builders.append("\",");
+                builders.append("\"cityName\": \"");builders.append(aMapLocation.getCity());builders.append("\",");
+                builders.append("\"provinceName\": \"");builders.append(aMapLocation.getProvince());builders.append("\",");
+                builders.append("\"latitude\": \"");builders.append(aMapLocation.getLatitude());builders.append("\",");
+                builders.append("\"longitude\": \"");builders.append(aMapLocation.getLongitude());builders.append("\"");
+                builders.append("}");
+                postMessageRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        Map<String, String> map = new HashMap<>(2);
+                        map.put("aMapCurrentLocation", builders.toString());
+                        methodChannel.invokeMethod("aMapCurrentLocation", map);
+                    }
+                };
+                if (platformThreadHandler.getLooper() == Looper.myLooper()) {
+                    postMessageRunnable.run();
+                } else {
+                    platformThreadHandler.post(postMessageRunnable);
+                }
             } else {
                 Toast.makeText(context,"定位失败，请检查GPS是否开启！", Toast.LENGTH_SHORT).show();
             }
@@ -183,10 +207,11 @@ public class AMap2DView implements PlatformView, MethodChannel.MethodCallHandler
         if (!isPoiSearch) {
             return;
         }
-        query = new PoiSearch.Query(keyWord, SEARCH_CONTENT, city);
+        query = new PoiSearch.Query(keyWord, "", city);
         // 设置每页最多返回多少条poiitem
         query.setPageSize(50);
         query.setPageNum(0);
+        query.setCityLimit(true);
         try {
             PoiSearch poiSearch = new PoiSearch(context, query);
             poiSearch.setOnPoiSearchListener(this);
@@ -328,4 +353,5 @@ public class AMap2DView implements PlatformView, MethodChannel.MethodCallHandler
     public void onPoiItemSearched(PoiItem poiItem, int i) {
 
     }
+
 }

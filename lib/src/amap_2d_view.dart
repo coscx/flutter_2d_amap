@@ -8,7 +8,7 @@ if (dart.library.html) 'web/amap_2d_view_state.dart'
 if (dart.library.io) 'mobile/amap_2d_view_state.dart';
 
 import 'poi_search_model.dart';
-
+import 'poi_location_model.dart';
 
 typedef AMap2DViewCreatedCallback = void Function(AMap2DController controller);
 
@@ -18,13 +18,14 @@ class AMap2DView extends StatefulWidget {
     Key? key,
     this.isPoiSearch = true,
     this.onPoiSearched,
+    this.onPoiLocation,
     this.onAMap2DViewCreated,
   }) : super(key: key);
   
   final bool isPoiSearch;
   final AMap2DViewCreatedCallback? onAMap2DViewCreated;
   final Function(List<PoiSearch>)? onPoiSearched;
-
+  final Function(PoiLocation)? onPoiLocation;
   @override
   AMap2DViewState createState() => AMap2DViewState();
 }

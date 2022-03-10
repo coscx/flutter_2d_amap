@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter_2d_amap/flutter_2d_amap.dart';
 import 'package:flutter_2d_amap/src/interface/amap_2d_controller.dart';
-
+import '../poi_location_model.dart';
 class AMap2DMobileController extends AMap2DController {
   AMap2DMobileController(
       int id,
@@ -28,6 +28,25 @@ class AMap2DMobileController extends AMap2DController {
               list.add(PoiSearch.fromJsonMap(value as Map<String, dynamic>));
             });
             _widget.onPoiSearched!(list);
+          }
+          return Future<dynamic>.value('');
+        }
+        break;
+      case 'aMapCurrentLocation':
+        {
+          if (_widget.onPoiLocation != null) {
+            final Map args = call.arguments as Map<dynamic, dynamic>;
+            final List<PoiSearch> list = [];
+            var m = Map<String, dynamic>();
+            try{
+               m =json.decode(args['aMapCurrentLocation']) as Map<String, dynamic>;
+            }catch(e){
+              print(e);
+            }
+
+
+            PoiLocation data = PoiLocation.fromJsonMap(m);
+            _widget.onPoiLocation!(data);
           }
           return Future<dynamic>.value('');
         }
